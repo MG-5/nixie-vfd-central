@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug",
+      "type": "gdb",
+      "request": "launch",
+      "target": "${workspaceFolder}/build/${command:espIdf.getProjectName}.elf",
+      "cwd": "${workspaceFolder}",
+      "gdbpath": "${command:espIdf.getXtensaGdb}",
+      // "preLaunchTask": "OpenOCD",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${config:idf.customExtraPaths}"
+        }
+      ],
+      "autorun": [
+        "-enable-pretty-printing",
+        "target remote :3333",
+        "mon reset halt",
+        "flushregs",
+        "thb app_main",
+        "c"
+      ],
+    }
+  ]
+}

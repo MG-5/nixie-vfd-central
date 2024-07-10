@@ -1,0 +1,10 @@
+build/
+.vscode/**
+!.vscode/c_cpp_properties.json
+!.vscode/launch.json
+!.vscode/tasks.json
+/main/loginData.hpp
+/sdkconfig.old
+
+# lock files for examples and components
+dependencies.lock

@@ -1,0 +1,8 @@
+[submodule "main/components/util"]
+	path = main/components/util
+	url = ../util.git
+
+[submodule "util"]
+	path = main/components/util
+	url = git@github.com:MG-5/util.git
+	branch = esp32
