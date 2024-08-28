@@ -22,9 +22,9 @@ public:
     static constexpr std::string_view TopicWildcard = "nixie-vfd-clock/#";
     static constexpr std::string_view TopicMainString = "nixie-vfd-clock/";
 
-    MqttClient(util::wrappers::StreamBuffer &txStreamBuffer)
+    MqttClient(util::wrappers::StreamBuffer &txStream)
         : TaskWithMemberFunctionBase("mqttClientTask", 1024, osPriorityNormal3), //
-          txStreamBuffer(txStreamBuffer)                                         //
+          txStream(txStream)                                                     //
     {};
 
     static void eventHandlerCallback(void *handlerArgs, esp_event_base_t base, int32_t eventId,
@@ -42,7 +42,7 @@ private:
 
     esp_mqtt_client_handle_t client;
 
-    util::wrappers::StreamBuffer &txStreamBuffer;
+    util::wrappers::StreamBuffer &txStream;
 
     void init();
     void subscribeToTopic(const std::string_view &topic);

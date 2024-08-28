@@ -1,6 +1,9 @@
 idf_component_register(SRCS 
     mqtt/MqttClient.cxx
+
+    uart/PacketProcessor.cxx
     uart/UartEvent.cxx
+
     wifi/Wireless.cxx
 
     Application.cxx

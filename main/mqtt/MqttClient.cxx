@@ -36,9 +36,10 @@ void MqttClient::dataCallback(void *eventData)
     ESP_LOGI(PrintTag, "data: %s", data.c_str());
 
     PacketHeader header = {.topicLength = (uint16_t)topic.size(), .payloadSize = dataLength};
-    txStreamBuffer.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
-    txStreamBuffer.send(reinterpret_cast<uint8_t *>(topic.data()), topic.size());
-    txStreamBuffer.send(reinterpret_cast<uint8_t *>(event->data), dataLength);
+
+    txStream.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
+    txStream.send(reinterpret_cast<uint8_t *>(topic.data()), topic.size());
+    txStream.send(reinterpret_cast<uint8_t *>(event->data), dataLength);
 }
 
 void MqttClient::init()

@@ -6,6 +6,7 @@
 
 #include "mqtt/MqttClient.hpp"
 #include "time/TimeSource.hpp"
+#include "uart/PacketProcessor.hpp"
 #include "uart/UartEvent.hpp"
 #include "uart/UartTx.hpp"
 #include "wifi/Wireless.hpp"
@@ -25,16 +26,18 @@ private:
     Wireless wifi{};
 
     static constexpr auto UartNumber = UART_NUM_1;
-    util::wrappers::StreamBuffer txStreamBuffer{1024, 1};
-    UartEvent uartEvent{UartNumber};
-    UartTx uartTx{UartNumber, txStreamBuffer};
+    static constexpr auto BufferSize = 512;
+    util::wrappers::StreamBuffer txStream{BufferSize, 1};
+    util::wrappers::StreamBuffer rxStream{BufferSize, 1};
+    UartEvent uartEvent{UartNumber, rxStream};
+    UartTx uartTx{UartNumber, txStream};
 
     static void syncTimeHandler(timeval *tv)
     {
         getApplicationInstance().timeSource.onTimeSync();
     }
 
-    TimeSource timeSource{syncTimeHandler, txStreamBuffer};
-
-    MqttClient mqttClient{txStreamBuffer};
+    TimeSource timeSource{syncTimeHandler, txStream};
+    PacketProcessor packetProcessor{rxStream, timeSource};
+    MqttClient mqttClient{txStream};
 };

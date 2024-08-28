@@ -11,10 +11,10 @@
 class UartTx : public util::wrappers::TaskWithMemberFunctionBase
 {
 public:
-    UartTx(uart_port_t uartNumber, util::wrappers::StreamBuffer &txStreamBuffer)
+    UartTx(uart_port_t uartNumber, util::wrappers::StreamBuffer &txStream)
         : TaskWithMemberFunctionBase("uartTxTask", 1024, osPriorityNormal1), //
           UartNumber(uartNumber),                                            //
-          txStreamBuffer(txStreamBuffer)                                     //
+          txStream(txStream)                                                 //
     {};
 
 protected:
@@ -22,37 +22,18 @@ protected:
     {
         while (true)
         {
-            const auto PacketSize =
-                txStreamBuffer.receive(rawDataBuffer.data(), BufferSize, portMAX_DELAY);
+            const auto PacketSize = txStream.receive(rawDataBuffer.data(), BufferSize, portMAX_DELAY);
 
             uart_write_bytes(UartNumber, rawDataBuffer.data(), PacketSize);
             ESP_LOGI(PrintTag, "Sent %d bytes over uart%d", PacketSize, UartNumber);
-            printData(PacketSize);
         }
     }
 
 private:
     const uart_port_t UartNumber{};
-    util::wrappers::StreamBuffer &txStreamBuffer;
+    util::wrappers::StreamBuffer &txStream;
     static constexpr auto PrintTag = "[UartTx]";
 
-    static constexpr auto BufferSize = 1024;
+    static constexpr auto BufferSize = 256;
     std::array<uint8_t, BufferSize> rawDataBuffer{};
-
-    void printData(size_t packetSize)
-    {
-        if (esp_log_level_get(PrintTag) != esp_log_level_t::ESP_LOG_DEBUG &&
-            esp_log_level_get(PrintTag) != esp_log_level_t::ESP_LOG_VERBOSE)
-            return;
-
-        std::string foo;
-
-        for (int i = 0; i < packetSize; i++)
-        {
-            foo += std::to_string(rawDataBuffer[i]);
-            foo += " ";
-        }
-
-        ESP_LOGD(PrintTag, "%s", foo.c_str());
-    }
 };

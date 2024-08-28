@@ -10,9 +10,10 @@
 class UartEvent : public util::wrappers::TaskWithMemberFunctionBase
 {
 public:
-    explicit UartEvent(uart_port_t uartNumber)
+    explicit UartEvent(uart_port_t uartNumber, util::wrappers::StreamBuffer &rxStream)
         : TaskWithMemberFunctionBase("uartEventTask", 1024, osPriorityNormal2), //
-          UartNumber(uartNumber) {};
+          UartNumber(uartNumber),                                               //
+          rxStream(rxStream) {};
 
 protected:
     void taskMain(void *) override;
@@ -23,8 +24,9 @@ private:
 
     void init();
 
-    static constexpr auto BufferSize = 1024;
-    std::array<uint8_t, BufferSize> rawDataBuffer{};
+    static constexpr auto RxBufferSize = 256;
+    std::array<uint8_t, RxBufferSize> rawDataBuffer{};
+    util::wrappers::StreamBuffer &rxStream;
 
     QueueHandle_t eventQueue = nullptr;
 };
