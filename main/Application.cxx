@@ -1,12 +1,9 @@
 #include "Application.hpp"
-#include "Timebase.hpp"
 #include "sync.hpp"
 #include "wrappers/Task.hpp"
 
 #include "esp_log.h"
 #include <memory>
-
-using namespace util::wrappers;
 
 // called by ESP-IDF
 extern "C" void app_main(void) // NOLINT
@@ -28,19 +25,9 @@ extern "C" void app_main(void) // NOLINT
 //--------------------------------------------------------------------------------------------------
 void Application::run()
 {
-    Task::applicationIsReadyStartAllTasks();
+    util::wrappers::Task::applicationIsReadyStartAllTasks();
 
-    sync::waitForAll(sync::ConnectedToWifi);
-    Timebase::initTimeSychronization();
-
-    resetTimer();
-    sync::waitForAll(sync::TimeIsSynchronized);
-    stopTimer();
-
-    while (true)
-    {
-        vTaskDelay(portMAX_DELAY);
-    }
+    vTaskSuspend(nullptr);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -48,12 +35,4 @@ Application &Application::getApplicationInstance()
 {
     static auto app = std::make_unique<Application>();
     return *app;
-}
-
-//--------------------------------------------------------------------------------------------------
-void Application::onTimeout(TimerHandle_t)
-{
-    ESP_LOGW(PrintTag, "No response from SNTP. Restart it.");
-    Timebase::initTimeSychronization();
-    resetTimer();
 }

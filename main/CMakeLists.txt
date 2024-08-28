@@ -4,7 +4,6 @@ idf_component_register(SRCS
     wifi/Wireless.cxx
 
     Application.cxx
-    sync.cxx
 
     REQUIRES
     driver

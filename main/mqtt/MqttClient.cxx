@@ -9,7 +9,7 @@ using namespace util::wrappers;
 
 void MqttClient::taskMain(void *)
 {
-    sync::waitForAll(sync::ConnectedToWifi);
+    syncEventGroup.waitBits(sync_events::ConnectedToWifi, pdFALSE, pdTRUE, portMAX_DELAY);
     init();
 
     while (true)

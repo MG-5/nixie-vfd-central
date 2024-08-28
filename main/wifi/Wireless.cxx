@@ -22,19 +22,7 @@ void Wireless::taskMain(void *)
     configureStation();
     startWifi();
 
-    while (true)
-    {
-        if (isConnected)
-        {
-            sync::waitForAll(sync::ConnectionFailed);
-            isConnected = false;
-        }
-        else
-        {
-            sync::waitForAll(sync::ConnectedToWifi);
-            isConnected = true;
-        }
-    }
+    vTaskSuspend(nullptr);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -68,6 +56,7 @@ void Wireless::init()
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 }
+
 //--------------------------------------------------------------------------------------------------
 void Wireless::configureStation()
 {
@@ -127,9 +116,8 @@ void Wireless::eventHandler(void *arg, esp_event_base_t eventBase, int32_t event
                 reinterpret_cast<wifi_event_sta_disconnected_t *>(eventData);
             ESP_LOGE(PrintTag, "Wifi disconnect. Reason : %d", disconnected->reason);
 
-            sync::clearEvents(sync::ConnectedToWifi);
-            sync::signal(sync::ConnectionFailed);
-
+            syncEventGroup.clearBits(sync_events::ConnectedToWifi);
+            syncEventGroup.setBits(sync_events::ConnectionFailed);
             if (++reconnectionCounter >= ReconnectionCounterThreshould)
             {
                 reconnectionCounter = 0;
@@ -157,8 +145,8 @@ void Wireless::eventHandler(void *arg, esp_event_base_t eventBase, int32_t event
         ipAdress = static_cast<ip_event_got_ip_t *>(eventData)->ip_info.ip;
         ESP_LOGI(PrintTag, "IP address: " IPSTR, IP2STR(&ipAdress));
 
-        sync::clearEvents(sync::ConnectionFailed);
-        sync::signal(sync::ConnectedToWifi);
+        syncEventGroup.clearBits(sync_events::ConnectionFailed);
+        syncEventGroup.setBits(sync_events::ConnectedToWifi);
     }
 }
 

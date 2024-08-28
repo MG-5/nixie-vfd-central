@@ -20,8 +20,6 @@ public:
 protected:
     void taskMain(void *) override
     {
-        // esp_log_level_set(PrintTag, ESP_LOG_DEBUG);
-
         while (true)
         {
             const auto PacketSize =

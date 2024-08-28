@@ -15,9 +15,8 @@ public:
     static constexpr auto RetryDelay = 3.0_s;
     static constexpr auto ReconnectionCounterThreshould = 5;
 
-    Wireless(bool &isConnected)
-        : TaskWithMemberFunctionBase("wirelessTask", 2048, osPriorityAboveNormal3),
-          isConnected(isConnected) //
+    Wireless()
+        : TaskWithMemberFunctionBase("wirelessTask", 2048, osPriorityAboveNormal3) //
     {};
 
     static void eventHandler(void *arg, esp_event_base_t eventBase, int32_t eventId,
@@ -31,8 +30,6 @@ protected:
     void taskMain(void *) override;
 
 private:
-    bool &isConnected;
-
     inline static uint8_t reconnectionCounter = 0;
 
     void init();
