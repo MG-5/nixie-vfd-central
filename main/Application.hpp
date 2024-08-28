@@ -4,6 +4,11 @@
 #include "freertos/timers.h"
 #include "helpers/freertos.hpp"
 
+#include "mqtt/MqttClient.hpp"
+#include "uart/UartEvent.hpp"
+#include "uart/UartTx.hpp"
+#include "wifi/Wireless.hpp"
+
 class Application
 {
 public:
@@ -22,6 +27,15 @@ public:
 
 private:
     bool isConnected = false;
+
+    Wireless wifi{isConnected};
+
+    static constexpr auto UartNumber = UART_NUM_1;
+    util::wrappers::StreamBuffer txStreamBuffer{1024, 1};
+    UartEvent uartEvent{UartNumber};
+    UartTx uartTx{UartNumber, txStreamBuffer};
+
+    MqttClient mqttClient{txStreamBuffer};
 
     inline static TimerHandle_t timeoutTimer = nullptr;
 

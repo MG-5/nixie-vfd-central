@@ -1,4 +1,8 @@
 idf_component_register(SRCS 
+    mqtt/MqttClient.cxx
+    uart/UartEvent.cxx
+    wifi/Wireless.cxx
+
     Application.cxx
     sync.cxx
 
@@ -6,6 +10,8 @@ idf_component_register(SRCS
     driver
     esp_app_format
     esp_wifi
+    mqtt
+    nvs_flash
 
     INCLUDE_DIRS ".")
 
