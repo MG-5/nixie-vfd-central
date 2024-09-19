@@ -17,8 +17,6 @@ extern "C" void app_main(void) // NOLINT
     ESP_LOGI(Application::PrintTag, "Application consumes %lu bytes on heap",
              (previousHeapFreeSpace - currentHeapFreeSpace));
 
-    vTaskDelay(toOsTicks(100.0_ms));
-
     app.run();
 }
 

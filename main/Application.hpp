@@ -25,19 +25,27 @@ public:
 private:
     Wireless wifi{};
 
-    static constexpr auto UartNumber = UART_NUM_1;
+    static constexpr auto Uart1Number = UART_NUM_1;
+    static constexpr auto Uart2Number = UART_NUM_2;
     static constexpr auto BufferSize = 512;
-    util::wrappers::StreamBuffer txStream{BufferSize, 1};
-    util::wrappers::StreamBuffer rxStream{BufferSize, 1};
-    UartEvent uartEvent{UartNumber, rxStream};
-    UartTx uartTx{UartNumber, txStream};
+
+    util::wrappers::StreamBuffer uart1TxStream{BufferSize, 1};
+    util::wrappers::StreamBuffer uart1RxStream{BufferSize, 1};
+    util::wrappers::StreamBuffer uart2TxStream{BufferSize, 1};
+    util::wrappers::StreamBuffer uart2RxStream{BufferSize, 1};
+
+    UartEvent uart1Event{Uart1Number, uart1RxStream};
+    UartTx uart1Tx{Uart1Number, uart1TxStream};
+    UartEvent uart2Event{Uart2Number, uart2RxStream};
+    UartTx uart2Tx{Uart2Number, uart2TxStream};
 
     static void syncTimeHandler(timeval *tv)
     {
         getApplicationInstance().timeSource.onTimeSync();
     }
 
-    TimeSource timeSource{syncTimeHandler, txStream};
-    PacketProcessor packetProcessor{rxStream, timeSource};
-    MqttClient mqttClient{txStream};
+    TimeSource timeSource{syncTimeHandler, uart1TxStream, uart2TxStream};
+    PacketProcessor packetProcessorUart1{uart1RxStream, timeSource};
+    PacketProcessor packetProcessorUart2{uart2RxStream, timeSource};
+    MqttClient mqttClient{uart1TxStream, uart2TxStream};
 };

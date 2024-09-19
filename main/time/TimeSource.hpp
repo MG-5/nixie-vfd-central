@@ -14,10 +14,12 @@
 class TimeSource : public util::wrappers::TaskWithMemberFunctionBase
 {
 public:
-    TimeSource(sntp_sync_time_cb_t syncTimeHandler, util::wrappers::StreamBuffer &txStream)
+    TimeSource(sntp_sync_time_cb_t syncTimeHandler, util::wrappers::StreamBuffer &txStream0,
+               util::wrappers::StreamBuffer &txStream1)
         : TaskWithMemberFunctionBase("timeSourceTask", 1024, osPriorityNormal1), //
           syncTimeHandler(syncTimeHandler),                                      //
-          txStream(txStream)
+          txStream0(txStream0),                                                  //
+          txStream1(txStream1)
     {
         assert(syncTimeHandler);
     };
@@ -50,9 +52,13 @@ public:
 
         PacketHeader header{.topicLength = (uint16_t)topic.size(), .payloadSize = numberOfCharacters};
 
-        txStream.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
-        txStream.send(reinterpret_cast<uint8_t *>(topic.data()), topic.length());
-        txStream.send(reinterpret_cast<uint8_t *>(buffer), numberOfCharacters);
+        txStream0.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
+        txStream0.send(reinterpret_cast<uint8_t *>(topic.data()), topic.length());
+        txStream0.send(reinterpret_cast<uint8_t *>(buffer), numberOfCharacters);
+
+        txStream1.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
+        txStream1.send(reinterpret_cast<uint8_t *>(topic.data()), topic.length());
+        txStream1.send(reinterpret_cast<uint8_t *>(buffer), numberOfCharacters);
     }
 
     //--------------------------------------------------------------------------------------------------
@@ -71,7 +77,8 @@ public:
 protected:
     void taskMain(void *) override
     {
-        timeSync.init(GPIO_MODE_OUTPUT);
+        timeSync0.init(GPIO_MODE_OUTPUT);
+        timeSync1.init(GPIO_MODE_OUTPUT);
         syncEventGroup.waitBits(sync_events::ConnectedToWifi, pdFALSE, pdTRUE, portMAX_DELAY);
 
         while (true)
@@ -90,17 +97,21 @@ protected:
         {
             vTaskDelayUntil(&lastWakeTime, toOsTicks(1.0_s));
 
-            timeSync.write(true);
-            vTaskDelay(toOsTicks(500.0_ms));
-            timeSync.write(false);
+            timeSync0.write(true);
+            timeSync1.write(true);
+            vTaskDelay(toOsTicks(100.0_ms));
+            timeSync0.write(false);
+            timeSync1.write(false);
         }
     }
 
 private:
     sntp_sync_time_cb_t syncTimeHandler;
-    util::wrappers::StreamBuffer &txStream;
+    util::wrappers::StreamBuffer &txStream0;
+    util::wrappers::StreamBuffer &txStream1;
 
-    util::Gpio timeSync{GPIO_NUM_13};
+    util::Gpio timeSync0{GPIO_NUM_13};
+    util::Gpio timeSync1{GPIO_NUM_15};
 
     //--------------------------------------------------------------------------------------------------
     void initTimeSychronization()

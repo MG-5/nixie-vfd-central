@@ -37,9 +37,13 @@ void MqttClient::dataCallback(void *eventData)
 
     PacketHeader header = {.topicLength = (uint16_t)topic.size(), .payloadSize = dataLength};
 
-    txStream.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
-    txStream.send(reinterpret_cast<uint8_t *>(topic.data()), topic.size());
-    txStream.send(reinterpret_cast<uint8_t *>(event->data), dataLength);
+    txStream0.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
+    txStream0.send(reinterpret_cast<uint8_t *>(topic.data()), topic.size());
+    txStream0.send(reinterpret_cast<uint8_t *>(event->data), dataLength);
+
+    txStream1.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
+    txStream1.send(reinterpret_cast<uint8_t *>(topic.data()), topic.size());
+    txStream1.send(reinterpret_cast<uint8_t *>(event->data), dataLength);
 }
 
 void MqttClient::init()
@@ -49,11 +53,9 @@ void MqttClient::init()
     if (client == nullptr)
         ESP_LOGE(PrintTag, "Creating mqtt client was not successful!");
 
-    auto returnValue =
-        esp_mqtt_client_register_event(client, MQTT_EVENT_ANY, eventHandlerCallback, this);
+    auto returnValue = esp_mqtt_client_register_event(client, MQTT_EVENT_ANY, eventHandlerCallback, this);
     if (returnValue != ESP_OK)
-        ESP_LOGE(PrintTag, "Cannot register mqtt client callback! error: %s",
-                 esp_err_to_name(returnValue));
+        ESP_LOGE(PrintTag, "Cannot register mqtt client callback! error: %s", esp_err_to_name(returnValue));
 
     returnValue = esp_mqtt_client_start(client);
     if (returnValue != ESP_OK)
@@ -65,13 +67,11 @@ void MqttClient::createSubscribers()
     auto messageId = esp_mqtt_client_subscribe(client, TopicWildcard.data(), 0);
 
     if (messageId < 0)
-        ESP_LOGE(PrintTag, "Cannot subscribe to topic %s! error: %d", TopicWildcard.data(),
-                 messageId);
+        ESP_LOGE(PrintTag, "Cannot subscribe to topic %s! error: %d", TopicWildcard.data(), messageId);
 }
 
 //--------------------------------------------------------------------------------------------------
-void MqttClient::eventHandlerCallback(void *handlerArgs, esp_event_base_t base, int32_t eventId,
-                                      void *eventData)
+void MqttClient::eventHandlerCallback(void *handlerArgs, esp_event_base_t base, int32_t eventId, void *eventData)
 {
     auto mqttClientContext = reinterpret_cast<MqttClient *>(handlerArgs);
 
@@ -112,10 +112,8 @@ void MqttClient::eventHandlerCallback(void *handlerArgs, esp_event_base_t base, 
         {
             logErrorIfNotZero("reported from esp-tls", event->error_handle->esp_tls_last_esp_err);
             logErrorIfNotZero("reported from tls stack", event->error_handle->esp_tls_stack_err);
-            logErrorIfNotZero("captured as transport's socket errno",
-                              event->error_handle->esp_transport_sock_errno);
-            ESP_LOGE(PrintTag, "Last errno string (%s)",
-                     strerror(event->error_handle->esp_transport_sock_errno));
+            logErrorIfNotZero("captured as transport's socket errno", event->error_handle->esp_transport_sock_errno);
+            ESP_LOGE(PrintTag, "Last errno string (%s)", strerror(event->error_handle->esp_transport_sock_errno));
         }
         break;
 

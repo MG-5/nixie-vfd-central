@@ -12,8 +12,8 @@ class PacketProcessor : public util::wrappers::TaskWithMemberFunctionBase
 {
 public:
     PacketProcessor(util::wrappers::StreamBuffer &rxStream, TimeSource &timeSource)
-        : TaskWithMemberFunctionBase("packetProcessor", 512, osPriorityAboveNormal), //
-          rxStream(rxStream),                                                        //
+        : TaskWithMemberFunctionBase("packetProcessor", 1024, osPriorityAboveNormal), //
+          rxStream(rxStream),                                                         //
           timeSource(timeSource) {};
 
     static constexpr auto PrintTag = "[PacketProcessor]";

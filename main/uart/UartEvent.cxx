@@ -63,8 +63,14 @@ void UartEvent::init()
                                 .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
 
     ESP_ERROR_CHECK(uart_param_config(UartNumber, &uartConfig));
-    ESP_ERROR_CHECK(uart_set_pin(UartNumber, gpio_num_t::GPIO_NUM_12, gpio_num_t::GPIO_NUM_14, gpio_num_t::GPIO_NUM_NC,
-                                 gpio_num_t::GPIO_NUM_NC));
+
+    if (UartNumber == UART_NUM_1)
+        ESP_ERROR_CHECK(uart_set_pin(UartNumber, gpio_num_t::GPIO_NUM_12, gpio_num_t::GPIO_NUM_14,
+                                     gpio_num_t::GPIO_NUM_NC, gpio_num_t::GPIO_NUM_NC));
+
+    else if (UartNumber == UART_NUM_2)
+        ESP_ERROR_CHECK(uart_set_pin(UartNumber, gpio_num_t::GPIO_NUM_2, gpio_num_t::GPIO_NUM_4,
+                                     gpio_num_t::GPIO_NUM_NC, gpio_num_t::GPIO_NUM_NC));
 
     // install UART driver, and get the queue.
     ESP_ERROR_CHECK(uart_driver_install(UartNumber, 256, 256, 64, &eventQueue, 0));
