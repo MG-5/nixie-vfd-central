@@ -50,7 +50,10 @@ bool PacketProcessor::extractPacketFromReceiveStream()
         rxStream.receive(rxBuffer + bufferLastPosition, RxBufferSize - bufferLastPosition, portMAX_DELAY);
 
     if (NumberOfBytes == 0)
+    {
+        rxStream.reset();
         return false; // no bytes received
+    }
 
     bufferLastPosition += NumberOfBytes;
 

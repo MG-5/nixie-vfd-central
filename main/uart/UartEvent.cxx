@@ -48,6 +48,7 @@ void UartEvent::taskMain(void *)
                 break;
 
             default:
+                ESP_LOGI(PrintTag, "uart event type: %d", event.type);
                 break;
             }
         }

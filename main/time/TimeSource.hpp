@@ -62,6 +62,20 @@ public:
     }
 
     //--------------------------------------------------------------------------------------------------
+
+    void sendTimeSync()
+    {
+        std::string topic = "timesync";
+        PacketHeader header{.topicLength = (uint16_t)topic.length(), .payloadSize = 0};
+
+        txStream0.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
+        txStream0.send(reinterpret_cast<uint8_t *>(topic.data()), topic.length());
+
+        txStream1.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
+        txStream1.send(reinterpret_cast<uint8_t *>(topic.data()), topic.length());
+    }
+
+    //--------------------------------------------------------------------------------------------------
     [[nodiscard]] static Timestamp getCurrentUTC()
     {
         return std::chrono::system_clock::now();
@@ -77,8 +91,6 @@ public:
 protected:
     void taskMain(void *) override
     {
-        timeSync0.init(GPIO_MODE_OUTPUT);
-        timeSync1.init(GPIO_MODE_OUTPUT);
         syncEventGroup.waitBits(sync_events::ConnectedToWifi, pdFALSE, pdTRUE, portMAX_DELAY);
 
         while (true)
@@ -97,11 +109,7 @@ protected:
         {
             vTaskDelayUntil(&lastWakeTime, toOsTicks(1.0_s));
 
-            timeSync0.write(true);
-            timeSync1.write(true);
-            vTaskDelay(toOsTicks(100.0_ms));
-            timeSync0.write(false);
-            timeSync1.write(false);
+            sendTimeSync();
         }
     }
 
@@ -109,9 +117,6 @@ private:
     sntp_sync_time_cb_t syncTimeHandler;
     util::wrappers::StreamBuffer &txStream0;
     util::wrappers::StreamBuffer &txStream1;
-
-    util::Gpio timeSync0{GPIO_NUM_13};
-    util::Gpio timeSync1{GPIO_NUM_15};
 
     //--------------------------------------------------------------------------------------------------
     void initTimeSychronization()
