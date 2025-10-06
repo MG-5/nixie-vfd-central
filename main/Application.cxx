@@ -3,7 +3,21 @@
 #include "wrappers/Task.hpp"
 
 #include "esp_log.h"
+#include "wifi_manager.h"
 #include <memory>
+
+// -------------------------------------------------------------------------------------------------
+void connectionOkayCallback(void *pvParameter)
+{
+    ip_event_got_ip_t *param = (ip_event_got_ip_t *)pvParameter;
+
+    char str_ip[16];
+    esp_ip4addr_ntoa(&param->ip_info.ip, str_ip, IP4ADDR_STRLEN_MAX);
+
+    ESP_LOGI("Wifi", "Connection to Wifi establisched with IP: %s!", str_ip);
+
+    util::wrappers::Task::syncEventGroup.setBits(sync_events::ConnectedToWifi);
+}
 
 // called by ESP-IDF
 extern "C" void app_main(void) // NOLINT
@@ -17,6 +31,8 @@ extern "C" void app_main(void) // NOLINT
     ESP_LOGI(Application::PrintTag, "Application consumes %lu bytes on heap",
              (previousHeapFreeSpace - currentHeapFreeSpace));
 
+    wifi_manager_start();
+    wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &connectionOkayCallback);
     app.run();
 }
 

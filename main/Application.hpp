@@ -9,7 +9,6 @@
 #include "uart/PacketProcessor.hpp"
 #include "uart/UartEvent.hpp"
 #include "uart/UartTx.hpp"
-#include "wifi/Wireless.hpp"
 
 class Application
 {
@@ -23,8 +22,6 @@ public:
     static Application &getApplicationInstance();
 
 private:
-    Wireless wifi{};
-
     static constexpr auto Uart1Number = UART_NUM_1;
     static constexpr auto Uart2Number = UART_NUM_2;
     static constexpr auto BufferSize = 512;
