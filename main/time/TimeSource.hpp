@@ -65,7 +65,7 @@ public:
 
     void sendTimeSync()
     {
-        std::string topic = "timesync";
+        std::string topic = "sync";
         PacketHeader header{.topicLength = (uint16_t)topic.length(), .payloadSize = 0};
 
         txStream0.send(reinterpret_cast<uint8_t *>(&header), sizeof(header));
@@ -86,6 +86,11 @@ public:
     {
         const auto CurrentTime = std::chrono::system_clock::to_time_t(now);
         return std::localtime(&CurrentTime);
+    }
+
+    void queueTimeSend()
+    {
+        shouldSendTime = true;
     }
 
 protected:
@@ -109,7 +114,13 @@ protected:
         {
             vTaskDelayUntil(&lastWakeTime, toOsTicks(1.0_s));
 
-            sendTimeSync();
+            if (shouldSendTime)
+            {
+                sendTimePerUart();
+                shouldSendTime = false;
+            }
+            else
+                sendTimeSync();
         }
     }
 
@@ -117,6 +128,8 @@ private:
     sntp_sync_time_cb_t syncTimeHandler;
     util::wrappers::StreamBuffer &txStream0;
     util::wrappers::StreamBuffer &txStream1;
+
+    bool shouldSendTime = false;
 
     //--------------------------------------------------------------------------------------------------
     void initTimeSychronization()

@@ -30,7 +30,7 @@ void PacketProcessor::processPacket()
     if (topicString == "clock" && payloadString == "request")
     {
         ESP_LOGI(PrintTag, "Time request received.");
-        timeSource.sendTimePerUart();
+        timeSource.queueTimeSend();
     }
 }
 
