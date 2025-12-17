@@ -4,6 +4,7 @@
 #include "esp_log.h"
 #include "mqtt_client.h"
 
+#include "time/TimeSource.hpp"
 #include "units/si/time.hpp"
 #include "wrappers/StreamBuffer.hpp"
 #include "wrappers/Task.hpp"
@@ -22,10 +23,11 @@ public:
     static constexpr std::string_view TopicWildcard = "nixie-vfd-clock/#";
     static constexpr std::string_view TopicMainString = "nixie-vfd-clock/";
 
-    MqttClient(util::wrappers::StreamBuffer &txStream0, util::wrappers::StreamBuffer &txStream1)
+    MqttClient(util::wrappers::StreamBuffer &txStream0, util::wrappers::StreamBuffer &txStream1, TimeSource &timeSource)
         : TaskWithMemberFunctionBase("mqttClientTask", 1024, osPriorityNormal3), //
           txStream0(txStream0),                                                  //
-          txStream1(txStream1) {};
+          txStream1(txStream1),                                                  //
+          timeSource(timeSource) {};
 
     static void eventHandlerCallback(void *handlerArgs, esp_event_base_t base, int32_t eventId, void *eventData);
 
@@ -43,6 +45,8 @@ private:
 
     util::wrappers::StreamBuffer &txStream0;
     util::wrappers::StreamBuffer &txStream1;
+
+    TimeSource &timeSource;
 
     void init();
     void subscribeToTopic(const std::string_view &topic);

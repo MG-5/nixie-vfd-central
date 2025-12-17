@@ -47,5 +47,5 @@ private:
     TimeSource timeSource{syncTimeHandler, uart1TxStream, uart2TxStream};
     PacketProcessor packetProcessorUart1{uart1RxStream, timeSource};
     PacketProcessor packetProcessorUart2{uart2RxStream, timeSource};
-    MqttClient mqttClient{uart1TxStream, uart2TxStream};
+    MqttClient mqttClient{uart1TxStream, uart2TxStream, timeSource};
 };

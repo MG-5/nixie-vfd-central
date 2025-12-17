@@ -8,6 +8,7 @@
 
 #include "helpers/freertos.hpp"
 #include "util/gpio.hpp"
+#include "wrappers/StreamBuffer.hpp"
 #include "wrappers/Task.hpp"
 #include <chrono>
 
@@ -34,8 +35,7 @@ public:
         ESP_LOGI(PrintTag, "Time synchronization event arrived.");
         printLocaltime();
         syncEventGroup.setBits(sync_events::TimeIsSynchronized);
-
-        sendTimePerUart();
+        queueTimeSend();
     }
 
     //--------------------------------------------------------------------------------------------------
@@ -93,6 +93,12 @@ public:
         shouldSendTime = true;
     }
 
+    void alignTimeSyncToCountdown()
+    {
+        prepareForCountdown = true;
+        notify(0, util::wrappers::NotifyAction::SetBits);
+    }
+
 protected:
     void taskMain(void *) override
     {
@@ -108,11 +114,17 @@ protected:
                 break;
         }
 
-        auto lastWakeTime = xTaskGetTickCount();
-
         while (true)
         {
-            vTaskDelayUntil(&lastWakeTime, toOsTicks(1.0_s));
+            delayUntilEventOrTimeout(1.0_s);
+
+            if (prepareForCountdown)
+            {
+                // align time sync to countdown start/resume
+                // wait until next second
+                prepareForCountdown = false;
+                continue;
+            }
 
             if (shouldSendTime)
             {
@@ -130,6 +142,7 @@ private:
     util::wrappers::StreamBuffer &txStream1;
 
     bool shouldSendTime = false;
+    bool prepareForCountdown = false;
 
     //--------------------------------------------------------------------------------------------------
     void initTimeSychronization()
@@ -153,5 +166,14 @@ private:
         std::tm *localTime = getLocaltime(getCurrentUTC());
         ESP_LOGI(PrintTag, "local time in Berlin: %02d:%02d:%02d", localTime->tm_hour, localTime->tm_min,
                  localTime->tm_sec);
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    /// block task for specified time but can be unblocked by external event e.g. time sync shift
+    /// @return true if timeout is occurred
+    bool delayUntilEventOrTimeout(units::si::Time blockTime, bool blockIndefinitely = false)
+    {
+        return notifyWait(ULONG_MAX, ULONG_MAX, (uint32_t *)0,
+                          blockIndefinitely ? portMAX_DELAY : toOsTicks(blockTime)) == 0;
     }
 };

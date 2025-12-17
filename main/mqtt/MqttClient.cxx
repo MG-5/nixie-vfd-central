@@ -45,7 +45,11 @@ void MqttClient::dataCallback(void *eventData)
     txStream1.send(reinterpret_cast<uint8_t *>(topic.data()), topic.size());
     txStream1.send(reinterpret_cast<uint8_t *>(event->data), dataLength);
 
-    // ToDo listen for countdown/countup topics with start/resume commands to shift time sync triggerpoint
+    // listen for countdown/countup topics with start/resume commands to shift time sync triggerpoint
+    if (topic == "countdown" && (data.starts_with("start") || data == "resume"))
+    {
+        timeSource.alignTimeSyncToCountdown();
+    }
 }
 
 void MqttClient::init()
