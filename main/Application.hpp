@@ -25,8 +25,8 @@ public:
 private:
     Wireless wifi{};
 
-    static constexpr auto Uart1Number = UART_NUM_1;
-    static constexpr auto Uart2Number = UART_NUM_2;
+    static constexpr auto Uart1Number = UART_NUM_0;
+    static constexpr auto Uart2Number = UART_NUM_1;
     static constexpr auto BufferSize = 512;
 
     util::wrappers::StreamBuffer uart1TxStream{BufferSize, 1};

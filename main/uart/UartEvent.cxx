@@ -65,12 +65,12 @@ void UartEvent::init()
 
     ESP_ERROR_CHECK(uart_param_config(UartNumber, &uartConfig));
 
-    if (UartNumber == UART_NUM_1)
-        ESP_ERROR_CHECK(uart_set_pin(UartNumber, gpio_num_t::GPIO_NUM_12, gpio_num_t::GPIO_NUM_14,
+    if (UartNumber == UART_NUM_0)
+        ESP_ERROR_CHECK(uart_set_pin(UartNumber, gpio_num_t::GPIO_NUM_5, gpio_num_t::GPIO_NUM_6,
                                      gpio_num_t::GPIO_NUM_NC, gpio_num_t::GPIO_NUM_NC));
 
-    else if (UartNumber == UART_NUM_2)
-        ESP_ERROR_CHECK(uart_set_pin(UartNumber, gpio_num_t::GPIO_NUM_2, gpio_num_t::GPIO_NUM_4,
+    else if (UartNumber == UART_NUM_1)
+        ESP_ERROR_CHECK(uart_set_pin(UartNumber, gpio_num_t::GPIO_NUM_9, gpio_num_t::GPIO_NUM_10,
                                      gpio_num_t::GPIO_NUM_NC, gpio_num_t::GPIO_NUM_NC));
 
     // install UART driver, and get the queue.
