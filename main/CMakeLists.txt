@@ -4,8 +4,6 @@ idf_component_register(SRCS
     uart/PacketProcessor.cxx
     uart/UartEvent.cxx
 
-    wifi/Wireless.cxx
-
     Application.cxx
 
     REQUIRES
