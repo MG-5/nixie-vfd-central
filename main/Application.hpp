@@ -4,6 +4,7 @@
 #include "freertos/timers.h"
 #include "helpers/freertos.hpp"
 
+#include "StatusLed.hpp"
 #include "mqtt/MqttClient.hpp"
 #include "time/TimeSource.hpp"
 #include "uart/PacketProcessor.hpp"
@@ -45,4 +46,5 @@ private:
     PacketProcessor packetProcessorUart1{uart1RxStream, timeSource};
     PacketProcessor packetProcessorUart2{uart2RxStream, timeSource};
     MqttClient mqttClient{uart1TxStream, uart2TxStream, timeSource};
+    StatusLed statusLed{};
 };
