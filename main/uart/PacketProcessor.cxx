@@ -51,6 +51,7 @@ bool PacketProcessor::extractPacketFromReceiveStream()
 
     if (NumberOfBytes == 0)
     {
+        ESP_LOGE(PrintTag, "reset buffer");
         rxStream.reset();
         return false; // no bytes received
     }

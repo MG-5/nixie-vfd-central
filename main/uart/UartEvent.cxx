@@ -1,5 +1,6 @@
+#include "driver/gpio.h"
 #include "esp_log.h"
-#include "hal/gpio_types.h"
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -24,7 +25,7 @@ void UartEvent::taskMain(void *)
             switch (event.type)
             {
             case UART_DATA:
-                ESP_LOGI(PrintTag, "read %d bytes", event.size);
+                ESP_LOGI(PrintTag, "read %d bytes from uart[%d]", event.size, UartNumber);
                 uart_read_bytes(UartNumber, rawDataBuffer.data(), event.size, portMAX_DELAY);
                 rxStream.send(rawDataBuffer.data(), event.size);
                 break;
@@ -66,12 +67,22 @@ void UartEvent::init()
     ESP_ERROR_CHECK(uart_param_config(UartNumber, &uartConfig));
 
     if (UartNumber == UART_NUM_0)
+    {
         ESP_ERROR_CHECK(uart_set_pin(UartNumber, gpio_num_t::GPIO_NUM_5, gpio_num_t::GPIO_NUM_6,
                                      gpio_num_t::GPIO_NUM_NC, gpio_num_t::GPIO_NUM_NC));
 
+        // enable RX pull-up
+        gpio_set_pull_mode(gpio_num_t::GPIO_NUM_6, GPIO_PULLUP_ONLY);
+    }
+
     else if (UartNumber == UART_NUM_1)
+    {
         ESP_ERROR_CHECK(uart_set_pin(UartNumber, gpio_num_t::GPIO_NUM_9, gpio_num_t::GPIO_NUM_10,
                                      gpio_num_t::GPIO_NUM_NC, gpio_num_t::GPIO_NUM_NC));
+
+        // enable RX pull-up
+        gpio_set_pull_mode(gpio_num_t::GPIO_NUM_10, GPIO_PULLUP_ONLY);
+    }
 
     // install UART driver, and get the queue.
     ESP_ERROR_CHECK(uart_driver_install(UartNumber, 256, 256, 64, &eventQueue, 0));
